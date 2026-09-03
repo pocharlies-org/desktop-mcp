@@ -1,0 +1,19 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "pocharlies-plugins",
+  "description": "Plugins published by pocharlies-org",
+  "owner": {
+    "name": "pocharlies-org",
+    "url": "https://github.com/pocharlies-org"
+  },
+  "plugins": [
+    {
+      "name": "desktop-control",
+      "description": "Control the whole desktop over MCP: screenshots, mouse, keyboard, apps and AppleScript. macOS and Linux/X11, with an on-screen notice naming whoever is driving.",
+      "author": { "name": "pocharlies-org" },
+      "category": "automation",
+      "source": "./plugins/desktop-control",
+      "homepage": "https://github.com/pocharlies-org/desktop-mcp"
+    }
+  ]
+}

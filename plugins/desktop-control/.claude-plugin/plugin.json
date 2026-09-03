@@ -1,0 +1,11 @@
+{
+  "name": "desktop-control",
+  "description": "Control the whole desktop over MCP: screenshots, mouse, keyboard, apps, AppleScript/JXA and the macOS accessibility tree. Works on macOS and Linux/X11. Shows a pulsing on-screen notice naming the session that is driving the machine, so whoever is sitting there always knows.",
+  "author": {
+    "name": "pocharlies-org",
+    "url": "https://github.com/pocharlies-org/desktop-mcp"
+  },
+  "homepage": "https://github.com/pocharlies-org/desktop-mcp",
+  "license": "MIT",
+  "keywords": ["desktop", "automation", "computer-use", "macos", "linux", "x11", "gui"]
+}
