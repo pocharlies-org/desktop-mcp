@@ -1,0 +1,16 @@
+{
+  "description": "Announces the effective backend (subscription vs local gateway) when a session starts.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/bin/backend-banner.sh\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

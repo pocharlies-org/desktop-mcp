@@ -1,0 +1,8 @@
+{
+  "name": "claude-backend-indicator",
+  "description": "Says in every session whether the turn is going to your Anthropic subscription or to a local LiteLLM gateway, and ships the wrapper that routes it. The model label alone can lie: the picker shows the model Claude Code believes it is using, not the host the request reaches. This reads ANTHROPIC_BASE_URL from the session's own process, so it cannot drift.",
+  "author": { "name": "pocharlies-org" },
+  "homepage": "https://github.com/pocharlies-org/desktop-mcp",
+  "license": "MIT",
+  "keywords": ["litellm", "gateway", "backend", "statusline", "self-hosted", "routing"]
+}

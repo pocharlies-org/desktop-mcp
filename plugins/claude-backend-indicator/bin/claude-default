@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# claude-default — cambia el modelo/agente por defecto de las pestanas NUEVAS.
+#
+#   claude-default                 muestra el estado
+#   claude-default local           default -> qwen38-flash-next (LiteLLM)
+#   claude-default tooling         default -> tooling (LiteLLM)
+#   claude-default opus|sonnet     default -> Anthropic
+#   claude-default agent <nombre>  agente por defecto
+#   claude-default subagents <m>   modelo de subagentes (sonnet|opus|inherit)
+set -u
+S="$HOME/.claude/settings.json"
+CFG="$HOME/.config/claude-local"; mkdir -p "$CFG"
+
+show() {
+  python3 - "$S" "$CFG" <<'PY'
+import json,os,sys
+s,cfg=sys.argv[1],sys.argv[2]
+d=json.load(open(s))
+m=d.get('model','-')
+back='LOCAL · LiteLLM' if str(m).startswith(('qwen','tooling','or-')) else 'ANTHROPIC'
+sub='inherit'
+p=os.path.join(cfg,'subagents')
+if os.path.exists(p): sub=open(p).read().strip() or 'inherit'
+print(f'  modelo por defecto : {m}   [{back}]')
+print(f'  agente por defecto : {d.get("agent","-")}')
+print(f'  subagentes         : {sub}')
+print('\n  Afecta a las pestanas NUEVAS. No hace falta recargar la ventana.')
+PY
+}
+
+set_key() {  # $1=clave $2=valor
+  python3 - "$S" "$1" "$2" <<'PY'
+import json,sys
+p,k,v=sys.argv[1],sys.argv[2],sys.argv[3]
+d=json.load(open(p)); d[k]=v
+json.dump(d,open(p,'w'),indent=2,ensure_ascii=False)
+print(f'  {k} -> {v}')
+PY
+}
+
+case "${1:-}" in
+  ""|status|show) show ;;
+  local)          set_key model qwen38-flash-next; show ;;
+  tooling)        set_key model tooling; show ;;
+  opus)           set_key model "opus[1m]"; show ;;
+  sonnet)         set_key model sonnet; show ;;
+  agent)          [ $# -ge 2 ] || { echo "uso: claude-default agent <nombre>"; exit 1; }
+                  set_key agent "$2"; show ;;
+  subagents)      [ $# -ge 2 ] || { echo "uso: claude-default subagents <sonnet|opus|inherit>"; exit 1; }
+                  echo "$2" > "$CFG/subagents"; echo "  subagents -> $2"; show ;;
+  *) sed -n '3,12p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
+esac

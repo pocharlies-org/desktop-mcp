@@ -10,9 +10,21 @@
     {
       "name": "desktop-control",
       "description": "Control the whole desktop over MCP: screenshots, mouse, keyboard, apps and AppleScript. macOS and Linux/X11, with an on-screen notice naming whoever is driving.",
-      "author": { "name": "pocharlies-org" },
+      "author": {
+        "name": "pocharlies-org"
+      },
       "category": "automation",
       "source": "./plugins/desktop-control",
+      "homepage": "https://github.com/pocharlies-org/desktop-mcp"
+    },
+    {
+      "name": "claude-backend-indicator",
+      "description": "Says in every session whether the turn goes to your Anthropic subscription or to a local LiteLLM gateway, and ships the wrapper that routes it. Reads the session's own environment, because the model label can disagree with where the request lands.",
+      "author": {
+        "name": "pocharlies-org"
+      },
+      "category": "productivity",
+      "source": "./plugins/claude-backend-indicator",
       "homepage": "https://github.com/pocharlies-org/desktop-mcp"
     }
   ]
