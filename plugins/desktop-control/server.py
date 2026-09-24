@@ -943,6 +943,38 @@ class Server(socketserver.ThreadingTCPServer):
     daemon_threads = True
 
 
+CHILDREN = os.path.join(os.path.expanduser("~"), ".config", "desktop-mcp", "children")
+
+
+def supervise_children():
+    """Start and keep alive the helpers listed in ~/.config/desktop-mcp/children, one
+    command per line (# comments). They run as this daemon's children, so on macOS they
+    inherit its Screen Recording and Accessibility grants, which an SSH session never has
+    (that is how the pocharlies-org/Peekaboo fork's exec_host drives Peekaboo remotely).
+    A helper that exits is started again after 5 s."""
+    try:
+        with open(CHILDREN) as f:
+            lines = [l.strip() for l in f if l.strip() and not l.lstrip().startswith("#")]
+    except OSError:
+        return
+
+    def keep(line):
+        while True:
+            cmd = [os.path.expanduser(os.path.expandvars(t)) for t in shlex.split(line)]
+            try:
+                p = subprocess.Popen(cmd, stdin=subprocess.DEVNULL)
+                logline("child started pid=%d: %s" % (p.pid, line))
+                logline("child exited rc=%s: %s" % (p.wait(), line))
+            except OSError as e:
+                logline("child failed to start (%s): %s" % (e, line))
+            time.sleep(5)
+
+    for line in lines:
+        t = threading.Thread(target=keep, args=(line,))
+        t.daemon = True
+        t.start()
+
+
 def serve_tcp():
     srv = None
     # A relaunching predecessor can still hold the port for a moment; retry rather
@@ -958,6 +990,7 @@ def serve_tcp():
         logline("giving up: could not bind %d" % PORT)
         sys.exit(1)
     logline("listening on 127.0.0.1:%d backend=%s" % (PORT, BE.name))
+    supervise_children()
     try:
         srv.serve_forever()
     finally:
