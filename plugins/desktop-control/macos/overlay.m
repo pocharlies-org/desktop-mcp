@@ -71,11 +71,15 @@ static void build(void) {
         NSRect f = [scr frame];
         CGFloat W = f.size.width, H = f.size.height, G = 70;
 
-        NSWindow *win = [[NSWindow alloc] initWithContentRect:f
+        // With screen: the rect is RELATIVE to that screen: passing its global frame added
+        // the origin twice and the notice of every external screen landed shifted onto
+        // another one. Create it at (0,0) of its screen, then pin the global frame.
+        NSWindow *win = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, W, H)
                                                     styleMask:NSWindowStyleMaskBorderless
                                                       backing:NSBackingStoreBuffered
                                                         defer:NO
                                                        screen:scr];
+        [win setFrame:f display:NO];
         win.opaque = NO;
         win.backgroundColor = [NSColor clearColor];
         win.hasShadow = NO;
@@ -100,6 +104,10 @@ static void build(void) {
         b.frame = NSMakeRect((W - bf.size.width) / 2, H - 30 - bf.size.height, bf.size.width, bf.size.height);
         [v addSubview:b];
 
+        // Layers at THEIR screen's scale (Retina 2x, externals 1x): without it the glow
+        // rendered at 1x on the Retina display.
+        v.layer.contentsScale = scr.backingScaleFactor;
+        for (CALayer *l in v.layer.sublayers) l.contentsScale = scr.backingScaleFactor;
         win.contentView = v;
         [win orderFrontRegardless];
         [gWindows addObject:win];
