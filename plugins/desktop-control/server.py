@@ -943,7 +943,9 @@ class Server(socketserver.ThreadingTCPServer):
     daemon_threads = True
 
 
-CHILDREN = os.path.join(os.path.expanduser("~"), ".config", "desktop-mcp", "children")
+CHILDREN = os.environ.get("DESKTOP_MCP_CHILDREN") or os.path.join(
+    os.path.expanduser("~"), ".config", "desktop-mcp", "children")
+LIVE_CHILDREN = []
 
 
 def supervise_children():
@@ -963,6 +965,7 @@ def supervise_children():
             cmd = [os.path.expanduser(os.path.expandvars(t)) for t in shlex.split(line)]
             try:
                 p = subprocess.Popen(cmd, stdin=subprocess.DEVNULL)
+                LIVE_CHILDREN.append(p)
                 logline("child started pid=%d: %s" % (p.pid, line))
                 logline("child exited rc=%s: %s" % (p.wait(), line))
             except OSError as e:
@@ -975,7 +978,49 @@ def supervise_children():
         t.start()
 
 
+def child_lines():
+    try:
+        with open(CHILDREN) as f:
+            return [l.strip() for l in f if l.strip() and not l.lstrip().startswith("#")]
+    except OSError:
+        return []
+
+
+def clean_leftovers():
+    """On start: kill the notice and the helpers a previous instance left behind. A daemon
+    that dies without cleaning up (SIGKILL, a deploy restarting it) orphans its overlay
+    with the glow on for good, since nothing else knows how to turn it off, and an
+    orphaned helper keeps its port so the new one cannot bind it."""
+    targets = [OVERLAY]
+    for line in child_lines():
+        toks = [os.path.expanduser(os.path.expandvars(t)) for t in shlex.split(line)]
+        # Only the script's absolute path: `pkill -f` on a bare argument ("300") would
+        # kill unrelated processes.
+        if toks and os.path.isabs(toks[-1]):
+            targets.append(toks[-1])
+    for t in targets:
+        subprocess.run(["pkill", "-f", t], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def on_sigterm(_sig, _frame):
+    """SIGTERM: turn the notice off and stop the helpers before exiting."""
+    try:
+        OVERLAY_MGR.stop()
+    except Exception:
+        pass
+    for p in LIVE_CHILDREN:
+        try:
+            p.terminate()
+        except Exception:
+            pass
+    logline("SIGTERM: notice off, %d helper(s) stopped" % len(LIVE_CHILDREN))
+    os._exit(0)
+
+
 def serve_tcp():
+    import signal
+    clean_leftovers()
+    signal.signal(signal.SIGTERM, on_sigterm)
     srv = None
     # A relaunching predecessor can still hold the port for a moment; retry rather
     # than dying and leaving the service down.
