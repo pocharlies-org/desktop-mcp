@@ -97,27 +97,20 @@ ssh somehost /usr/bin/nc 127.0.0.1 8811
 SSH is the whole authentication story — the daemon binds `127.0.0.1` only and has no
 tokens. Register it in a client as a stdio server whose command is that `ssh` line.
 
+## Helpers that need the daemon's grants
+
+In daemon mode the server starts and keeps alive every command listed in
+`~/.config/desktop-mcp/children` (one per line, `#` comments). They run as its children,
+so on macOS they inherit the app bundle's Screen Recording and Accessibility grants —
+something no SSH session has. The daemon reads the file when it starts.
+
 ## With Peekaboo (macOS)
 
-[Peekaboo](https://github.com/openclaw/Peekaboo) is the better tool for the screen,
-the accessibility tree and input: it acts in the background without taking the cursor
-or the focus, and addresses elements by ID instead of by pixel. It has no AppleScript/JXA
-and no banner naming who is driving the machine. `peekaboo_proxy.py` adds both: it runs
-`peekaboo mcp` as a child, forwards every call to it, adds this daemon's `applescript`,
-`set_control_context` and `overlay` tools, and lights the notice on every Peekaboo call
-that looks at or touches the desktop.
-
-It needs the daemon (`./install.sh --daemon`) and Peekaboo's CLI and app on the Mac.
-Over SSH, point Peekaboo at the app's Bridge — the Screen Recording and Accessibility
-grants belong to `Peekaboo.app`, never to an SSH session:
-
-```sh
-ssh mac python3 ~/desktop-mcp/plugins/desktop-control/peekaboo_proxy.py -- \
-    --allow-foreground --bridge-socket '"$HOME/Library/Application Support/Peekaboo/bridge.sock"'
-```
-
-Everything after `--` goes to `peekaboo mcp`. If the daemon is down Peekaboo keeps
-working and the proxy logs that the notice could not be shown.
+[Peekaboo](https://github.com/openclaw/Peekaboo) is the better tool for the screen, the
+accessibility tree and input. The proxy that puts this daemon's AppleScript and on-screen
+notice in front of it, and the host that runs it with the daemon's grants, live in the
+[pocharlies-org/Peekaboo](https://github.com/pocharlies-org/Peekaboo/tree/pocharlies/pocharlies)
+fork, which follows upstream's releases daily.
 
 ## Limitations, plainly
 
