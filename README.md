@@ -97,6 +97,28 @@ ssh somehost /usr/bin/nc 127.0.0.1 8811
 SSH is the whole authentication story — the daemon binds `127.0.0.1` only and has no
 tokens. Register it in a client as a stdio server whose command is that `ssh` line.
 
+## With Peekaboo (macOS)
+
+[Peekaboo](https://github.com/openclaw/Peekaboo) is the better tool for the screen,
+the accessibility tree and input: it acts in the background without taking the cursor
+or the focus, and addresses elements by ID instead of by pixel. It has no AppleScript/JXA
+and no banner naming who is driving the machine. `peekaboo_proxy.py` adds both: it runs
+`peekaboo mcp` as a child, forwards every call to it, adds this daemon's `applescript`,
+`set_control_context` and `overlay` tools, and lights the notice on every Peekaboo call
+that looks at or touches the desktop.
+
+It needs the daemon (`./install.sh --daemon`) and Peekaboo's CLI and app on the Mac.
+Over SSH, point Peekaboo at the app's Bridge — the Screen Recording and Accessibility
+grants belong to `Peekaboo.app`, never to an SSH session:
+
+```sh
+ssh mac python3 ~/desktop-mcp/plugins/desktop-control/peekaboo_proxy.py -- \
+    --allow-foreground --bridge-socket '"$HOME/Library/Application Support/Peekaboo/bridge.sock"'
+```
+
+Everything after `--` goes to `peekaboo mcp`. If the daemon is down Peekaboo keeps
+working and the proxy logs that the notice could not be shown.
+
 ## Limitations, plainly
 
 - **Linux is X11 only.** Wayland has no equivalent of `xdotool`'s input injection.
