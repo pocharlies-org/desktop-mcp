@@ -6,7 +6,7 @@ Servidor MCP de control de escritorio: capturas, ratón, teclado, aplicaciones, 
 
 - Claude Code (plugin `desktop-control@pocharlies-plugins`, marketplace en `.claude-plugin/marketplace.json`) y opencode (registrado por `install.sh`).
 - Plataformas: macOS (con `cliclick` y Xcode CLT) y Linux/X11 (`xdotool`, `imagemagick`, `wmctrl`, `xrandr`; sin Wayland).
-- La versión es la constante `VERSION` de `server.py` (valor no verificado).
+- Versión 1.0.0 (constante `VERSION` de `plugins/desktop-control/server.py`).
 
 ## Dependencias (en ambos sentidos)
 
@@ -30,14 +30,14 @@ Se mantiene la biblioteca estándar: no se añaden dependencias de Python. Un ca
 
 ## Tests
 
-`install.sh` ejecuta una autoprueba al terminar. No hay suite de tests ni CI en el repo: es un hueco.
+`install.sh` ejecuta una autoprueba al terminar. No hay suite de tests: es un hueco.
 
 ## CI/CD y despliegue
 
-Sin CI. Se publica con el propio repo (`/plugin marketplace add pocharlies-org/desktop-mcp`). Con `--daemon` se instala `DesktopMCP.app`, que hereda los permisos de macOS.
+Solo los workflows estándar de la org (`duplicados.yml` y `pr-review.yml`); sin build ni tests. Se publica con el propio repo (`/plugin marketplace add pocharlies-org/desktop-mcp`). Con `--daemon` se instala `DesktopMCP.app`, que hereda los permisos de macOS.
 
 ## Decisiones y trampas
 
 - El daemon supervisa los helpers que necesitan los permisos concedidos a la app (#2) y limpia el aviso al recibir SIGTERM (#3); el aviso se coloca en cada pantalla a su escala (#4).
 - Los permisos de macOS se conceden al proceso que ejecuta, no al repo: pasar de terminal a `--daemon` obliga a repetir la concesión.
-- Sin CI ni tests automáticos: toda regresión se ve en el uso.
+- Sin tests automáticos: toda regresión se ve en el uso.
