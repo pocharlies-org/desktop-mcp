@@ -874,8 +874,9 @@ def handle(session, req):
         if name not in NO_OVERLAY:
             OVERLAY_MGR.touch()
         res = fn(session, p.get("arguments") or {})
-        if isinstance(res, list):
-            return {"content": res}
+        # Every result goes through as one text item. A list must NOT be returned
+        # as `content` directly: its items are strings, not content blocks, and MCP
+        # clients reject the payload (DGX-1366: `app list` failed schema validation).
         if isinstance(res, str):
             return {"content": [{"type": "text", "text": res}]}
         return {"content": [{"type": "text",
