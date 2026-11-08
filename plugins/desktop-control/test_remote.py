@@ -50,7 +50,8 @@ with tempfile.TemporaryDirectory() as tmp:
 
     # With the cache, starting up never runs the transport command...
     os.remove(mark)
-    r = session(env, cmd, *init, req(2, "tools/list"), req(3, "ping"))
+    r = session(env, cmd, req(0, "server/discover"), *init, req(2, "tools/list"), req(3, "ping"))
+    assert r[0]["error"]["code"] == -32601, r
     assert r[1]["result"]["capabilities"] == {"tools": {}} and r[2]["result"]["tools"][0]["name"] == "echo", r
     assert not started()
 

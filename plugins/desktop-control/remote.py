@@ -102,13 +102,17 @@ def handle(msg):
     if method == "tools/list" and proc is None and (tools := cached_tools()) is not None:
         emit({"jsonrpc": "2.0", "id": rid, "result": tools})
         return
-    if method == "ping" and proc is None:
+    if proc is None and method == "ping":
         emit({"jsonrpc": "2.0", "id": rid, "result": {}})
+        return
+    # The daemon serves tools only; probes such as `server/discover` must not open the connection.
+    if proc is None and method not in ("tools/call", "tools/list"):
+        emit({"jsonrpc": "2.0", "id": rid, "error": {"code": -32601, "message": f"method not found: {method}"}})
         return
     if proc is None or proc.poll() is not None:
         try:
             proc = connect()
-        except (OSError, ConnectionError) as e:
+        except OSError as e:  # ConnectionError included
             proc = None
             if rid is not None:
                 emit({"jsonrpc": "2.0", "id": rid, "error": {"code": -32000, "message": str(e)}})
