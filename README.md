@@ -97,6 +97,16 @@ ssh somehost /usr/bin/nc 127.0.0.1 8811
 SSH is the whole authentication story — the daemon binds `127.0.0.1` only and has no
 tokens. Register it in a client as a stdio server whose command is that `ssh` line.
 
+Clients connect to every registered server when they start. To open the connection only
+when a tool is actually called, put `remote.py` in front of the same line:
+
+```sh
+python3 plugins/desktop-control/remote.py ssh somehost /usr/bin/nc 127.0.0.1 8811
+```
+
+It answers the handshake and the tool list from `~/.cache/desktop-mcp/` and runs the
+command on the first call. The first session ever connects once to fill that cache.
+
 ## Helpers that need the daemon's grants
 
 In daemon mode the server starts and keeps alive every command listed in

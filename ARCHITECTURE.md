@@ -30,7 +30,7 @@ Se mantiene la biblioteca estándar: no se añaden dependencias de Python. Un ca
 
 ## Tests
 
-`install.sh` ejecuta una autoprueba al terminar. No hay suite de tests: es un hueco.
+`install.sh` ejecuta una autoprueba al terminar y `python3 plugins/desktop-control/test_remote.py` prueba `remote.py` contra un daemon falso. `server.py` no tiene suite de tests: es un hueco.
 
 ## CI/CD y despliegue
 
@@ -40,4 +40,4 @@ Solo los workflows estándar de la org (`duplicados.yml` y `pr-review.yml`); sin
 
 - El daemon supervisa los helpers que necesitan los permisos concedidos a la app (#2) y limpia el aviso al recibir SIGTERM (#3); el aviso se coloca en cada pantalla a su escala (#4).
 - Los permisos de macOS se conceden al proceso que ejecuta, no al repo: pasar de terminal a `--daemon` obliga a repetir la concesión.
-- Sin tests automáticos: toda regresión se ve en el uso.
+- Sin tests automáticos de `server.py`: toda regresión se ve en el uso.
